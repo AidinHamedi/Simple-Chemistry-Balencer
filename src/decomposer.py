@@ -131,6 +131,7 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
         )
         # Increase the index
         idx += 1
+
     # Handle the stack multipliers
     for element in elements:
         element["number"] *= stack_multipliers[element["level"]]
@@ -213,6 +214,20 @@ def decompose_formula(formula: str) -> dict:
 
     # Split the reactants and products into their respective elements + return the reactants and products
     return {
-        "reactants": [{"decomposition": _split_elements(reactant), "chemical": reactant, "multiplier": 1} for reactant in reactants],
-        "products": [{"decomposition": _split_elements(product), "chemical": product, "multiplier": 1} for product in products],
+        "reactants": [
+            {
+                "decomposition": _split_elements(reactant),
+                "chemical": reactant,
+                "multiplier": 1,
+            }
+            for reactant in reactants
+        ],
+        "products": [
+            {
+                "decomposition": _split_elements(product),
+                "chemical": product,
+                "multiplier": 1,
+            }
+            for product in products
+        ],
     }

@@ -23,6 +23,8 @@ def chem_balance(formula: str = None) -> dict:
     # Decompose the formula
     decomposed_formula = decompose_formula(formula)
 
+    print(decomposed_formula)
+    
     # Balance the formula
     balanced_formula = balance_formula(decomposed_formula)
     

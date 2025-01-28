@@ -107,7 +107,7 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
                 raise SystemExit(f"Invalid element symbol: {element_symbol}")
             return []
         # Check if the next char is a digit or not
-        element_multiplier = 1
+        element_num = 1
         with suppress(IndexError):
             if not chemical[idx + 1].isalpha():
                 # Increase the index
@@ -115,17 +115,17 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
                 # Get the char
                 char = chemical[idx]
                 # Get the element multiplier
-                element_multiplier = char
+                element_num = char
                 with suppress(IndexError):
                     while chemical[idx + 1].isdigit():
-                        element_multiplier += chemical[idx + 1]
+                        element_num += chemical[idx + 1]
                         idx += 1
-                element_multiplier = int(element_multiplier)
+                element_num = int(element_num)
         # Add the element to the elements list
         elements.append(
             {
                 "element": element_symbol,
-                "multiplier": element_multiplier,
+                "number": element_num,
                 "level": element_level,
             }
         )
@@ -133,7 +133,7 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
         idx += 1
     # Handle the stack multipliers
     for element in elements:
-        element["multiplier"] *= stack_multipliers[element["level"]]
+        element["number"] *= stack_multipliers[element["level"]]
         del element["level"]
 
     # Return the elements
@@ -142,50 +142,64 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
 
 # Main >>>
 def decompose_formula(formula: str) -> dict:
-    """Decomposes a chemical equation into its reactants and products with their elemental composition.
+    """Decomposes a chemical equation into reactants and products with their elements.
 
-    Takes a chemical equation string with reactants and products separated by '=>' and breaks it down
-    into its constituent parts and elements.
+    Takes a chemical equation string with reactants and products separated by '=>'
+    and breaks it down into its constituent parts and elements.
 
     Args:
-        formula (str): A chemical equation string (e.g., "H2O+CO2=>H2CO3")
+        formula (str): Chemical equation string in format "reactants=>products"
+                      Example: "H2O+CO2=>H2CO3"
 
     Returns:
-        dict: A dictionary containing two keys:
-            - 'reactants': List of dictionaries for each reactant compound containing:
-                - 'decomposition': List of element dictionaries with 'element' and 'multiplier'
-                - 'chemical': Original chemical formula string
-            - 'products': List of dictionaries for each product compound containing:
-                - 'decomposition': List of element dictionaries with 'element' and 'multiplier'
-                - 'chemical': Original chemical formula string
+        dict: Dictionary containing decomposed reactants and products with structure:
+            {
+                "reactants": [
+                    {
+                        "decomposition": [{"element": str, "number": int}],
+                        "chemical": str,
+                        "multiplier": int
+                    }
+                ],
+                "products": [
+                    {
+                        "decomposition": [{"element": str, "number": int}],
+                        "chemical": str,
+                        "multiplier": int
+                    }
+                ]
+            }
 
     Example:
-        >>> decompose_formula("H2O+CO2=>H2CO3")
-        {
-            'reactants': [
+        Input: "H2O+CO2=>H2CO3"
+        Output: {
+            "reactants": [
                 {
-                    'decomposition': [
-                        {'element': 'H', 'multiplier': 2},
-                        {'element': 'O', 'multiplier': 1}
+                    "decomposition": [
+                        {"element": "H", "number": 2},
+                        {"element": "O", "number": 1}
                     ],
-                    'chemical': 'H2O'
+                    "chemical": "H2O",
+                    "multiplier": 1
                 },
                 {
-                    'decomposition': [
-                        {'element': 'C', 'multiplier': 1},
-                        {'element': 'O', 'multiplier': 2}
+                    "decomposition": [
+                        {"element": "C", "number": 1},
+                        {"element": "O", "number": 2}
                     ],
-                    'chemical': 'CO2'
+                    "chemical": "CO2",
+                    "multiplier": 1
                 }
             ],
-            'products': [
+            "products": [
                 {
-                    'decomposition': [
-                        {'element': 'H', 'multiplier': 2},
-                        {'element': 'C', 'multiplier': 1},
-                        {'element': 'O', 'multiplier': 3}
+                    "decomposition": [
+                        {"element": "H", "number": 2},
+                        {"element": "C", "number": 1},
+                        {"element": "O", "number": 3}
                     ],
-                    'chemical': 'H2CO3'
+                    "chemical": "H2CO3",
+                    "multiplier": 1
                 }
             ]
         }
@@ -199,6 +213,6 @@ def decompose_formula(formula: str) -> dict:
 
     # Split the reactants and products into their respective elements + return the reactants and products
     return {
-        "reactants": [{"decomposition": _split_elements(reactant), "chemical": reactant} for reactant in reactants],
-        "products": [{"decomposition": _split_elements(product), "chemical": product} for product in products],
+        "reactants": [{"decomposition": _split_elements(reactant), "chemical": reactant, "multiplier": 1} for reactant in reactants],
+        "products": [{"decomposition": _split_elements(product), "chemical": product, "multiplier": 1} for product in products],
     }

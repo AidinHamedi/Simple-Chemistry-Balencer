@@ -7,8 +7,21 @@ from Utils.element_symbols import ELEMENT_SYMBOLS
 
 # Helpers >>>
 def _split_chemicals(formula: str) -> list:
-    # Split the chemicals with '+' sign
+    """Splits a chemical formula string into individual chemical compounds.
+    
+    Takes a string containing multiple chemical compounds separated by '+' signs
+    and returns them as a list of individual compounds.
+    
+    Args:
+        formula (str): String of chemical compounds separated by '+'
+                      Example: "H2O+CO2"
+    
+    Returns:
+        list: List of chemical compound strings
+              Example: ["H2O", "CO2"]
+    """
     return formula.split("+")
+
 
 def _split_elements(chemical: str, raise_error: bool = True) -> list:
     """Splits a chemical formula into its constituent elements and their quantities.
@@ -122,9 +135,46 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
 
 # Main >>>
 def decompose_formula(formula: str) -> dict:
+    """Decomposes a chemical formula into its reactants and products elements.
+    
+    Takes a chemical equation string with format 'reactants=>products' and breaks it down
+    into constituent elements with their quantities for both sides of the equation.
+    
+    Args:
+        formula (str): Chemical equation string using '=>' as separator
+                      Example: "H2O+CO2=>H2CO3"
+    
+    Returns:
+        dict: Dictionary containing two keys:
+            - 'reactants': List of dictionaries for reactant elements
+            - 'products': List of dictionaries for product elements
+            Each element dictionary contains:
+                - 'element': str (element symbol)
+                - 'multiplier': int (quantity of the element)
+    
+    Example:
+        >>> decompose_formula("H2O+CO2=>H2CO3")
+        {
+            'reactants': [
+                {'element': 'H', 'multiplier': 2},
+                {'element': 'O', 'multiplier': 1},
+                {'element': 'C', 'multiplier': 1},
+                {'element': 'O', 'multiplier': 2}
+            ],
+            'products': [
+                {'element': 'H', 'multiplier': 2},
+                {'element': 'C', 'multiplier': 1},
+                {'element': 'O', 'multiplier': 3}
+            ]
+        }
+    """
     # Split the formula into the reactants and products
     reactants, products = formula.split("=>")
     
+    # Split the reactants and products into their respective elements
+    reactants = _split_chemicals(reactants)
+    products = _split_chemicals(products)
     
-    
+    # Split the reactants and products into their respective elements + return the reactants and products
+    return {"reactants": _split_elements(reactants), "products": _split_elements(products)}
     

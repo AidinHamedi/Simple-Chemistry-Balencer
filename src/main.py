@@ -8,6 +8,7 @@ from .decomposer import decompose_formula
 
 # Prep >>>
 
+
 # Main >>>
 def chem_balance(formula: str = None) -> dict:
     # Check if a formula is given
@@ -17,6 +18,8 @@ def chem_balance(formula: str = None) -> dict:
     # Check if the formula is valid
     if not check_formula(formula, raise_error=False):
         return {"Error": "An invalid formula is given!"}
-    
+
     # Decompose the formula
     decomposed_formula = decompose_formula(formula)
+
+    print(decomposed_formula)

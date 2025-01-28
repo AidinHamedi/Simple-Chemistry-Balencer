@@ -3,19 +3,20 @@ import re
 from contextlib import suppress
 
 # Modules >>>
-from Utils.element_symbols import ELEMENT_SYMBOLS
+from .Utils.element_symbols import ELEMENT_SYMBOLS
+
 
 # Helpers >>>
 def _split_chemicals(formula: str) -> list:
     """Splits a chemical formula string into individual chemical compounds.
-    
+
     Takes a string containing multiple chemical compounds separated by '+' signs
     and returns them as a list of individual compounds.
-    
+
     Args:
         formula (str): String of chemical compounds separated by '+'
                       Example: "H2O+CO2"
-    
+
     Returns:
         list: List of chemical compound strings
               Example: ["H2O", "CO2"]
@@ -25,7 +26,7 @@ def _split_chemicals(formula: str) -> list:
 
 def _split_elements(chemical: str, raise_error: bool = True) -> list:
     """Splits a chemical formula into its constituent elements and their quantities.
-    
+
     This function parses chemical formulas including nested structures with parentheses
     and handles multiple-digit coefficients. It processes the formula character by character
     and tracks element levels for nested structures.
@@ -39,7 +40,7 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
         - Element symbols: identifies single/double letter elements
         - Numbers: processes as multipliers for elements
     4. Applies stack multipliers to handle nested structures
-    
+
     Examples:
         "(NH4)2Cr2O7" -> [
             {'element': 'N', 'multiplier': 2},
@@ -50,7 +51,7 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
 
     Args:
         chemical (str): The chemical formula to parse (e.g., "H2O", "(NH4)2SO4")
-        raise_error (bool, optional): If True, raises SystemExit for invalid elements. 
+        raise_error (bool, optional): If True, raises SystemExit for invalid elements.
                                     Defaults to True.
 
     Returns:
@@ -66,10 +67,10 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
     elements = []
     element_level = 0
     stack_multipliers = [1]
-    
+
     # Make the loop counter
     idx = 0
-    
+
     # Iterate over the chemical
     while idx < len(chemical):
         # Get the char
@@ -107,22 +108,28 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
                 raise SystemExit(f"Invalid element symbol: {element_symbol}")
             return []
         # Check if the next char is a digit or not
-        if chemical[idx + 1].isalpha():
-            element_multiplier = 1
-        else:
-            # Increase the index
-            idx += 1
-            # Get the char
-            char = chemical[idx]
-            # Get the element multiplier
-            element_multiplier = char
-            with suppress(IndexError):
-                while chemical[idx + 1].isdigit():
-                    element_multiplier += chemical[idx + 1]
-                    idx += 1
-            element_multiplier = int(element_multiplier)
+        element_multiplier = 1
+        with suppress(IndexError):
+            if not chemical[idx + 1].isalpha():
+                # Increase the index
+                idx += 1
+                # Get the char
+                char = chemical[idx]
+                # Get the element multiplier
+                element_multiplier = char
+                with suppress(IndexError):
+                    while chemical[idx + 1].isdigit():
+                        element_multiplier += chemical[idx + 1]
+                        idx += 1
+                element_multiplier = int(element_multiplier)
         # Add the element to the elements list
-        elements.append({"element": element_symbol, "multiplier": element_multiplier, "level": element_level})
+        elements.append(
+            {
+                "element": element_symbol,
+                "multiplier": element_multiplier,
+                "level": element_level,
+            }
+        )
         # Increase the index
         idx += 1
     # Handle the stack multipliers
@@ -133,48 +140,47 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
     # Return the elements
     return elements
 
+
 # Main >>>
 def decompose_formula(formula: str) -> dict:
-    """Decomposes a chemical formula into its reactants and products elements.
-    
-    Takes a chemical equation string with format 'reactants=>products' and breaks it down
-    into constituent elements with their quantities for both sides of the equation.
-    
+    """Decomposes a chemical equation into its constituent reactants and products.
+
+    Takes a chemical equation string with reactants and products separated by '=>'
+    and breaks it down into individual elements and their quantities.
+
     Args:
-        formula (str): Chemical equation string using '=>' as separator
-                      Example: "H2O+CO2=>H2CO3"
-    
+        formula (str): A chemical equation string (e.g., "H2O+CO2=>H2CO3")
+
     Returns:
-        dict: Dictionary containing two keys:
-            - 'reactants': List of dictionaries for reactant elements
-            - 'products': List of dictionaries for product elements
-            Each element dictionary contains:
+        dict: A dictionary containing two keys:
+            - 'reactants': List of decomposed reactant compounds
+            - 'products': List of decomposed product compounds
+            Each compound is represented as a list of dictionaries with:
                 - 'element': str (element symbol)
                 - 'multiplier': int (quantity of the element)
-    
+
     Example:
-        >>> decompose_formula("H2O+CO2=>H2CO3")
-        {
+        Input: "H2O+CO2=>H2CO3"
+        Output: {
             'reactants': [
-                {'element': 'H', 'multiplier': 2},
-                {'element': 'O', 'multiplier': 1},
-                {'element': 'C', 'multiplier': 1},
-                {'element': 'O', 'multiplier': 2}
+                [{'element': 'H', 'multiplier': 2}, {'element': 'O', 'multiplier': 1}],
+                [{'element': 'C', 'multiplier': 1}, {'element': 'O', 'multiplier': 2}]
             ],
             'products': [
-                {'element': 'H', 'multiplier': 2},
-                {'element': 'C', 'multiplier': 1},
-                {'element': 'O', 'multiplier': 3}
+                [{'element': 'H', 'multiplier': 2}, {'element': 'C', 'multiplier': 1}, 
+                 {'element': 'O', 'multiplier': 3}]
             ]
         }
     """
     # Split the formula into the reactants and products
     reactants, products = formula.split("=>")
-    
+
     # Split the reactants and products into their respective elements
     reactants = _split_chemicals(reactants)
     products = _split_chemicals(products)
-    
+
     # Split the reactants and products into their respective elements + return the reactants and products
-    return {"reactants": _split_elements(reactants), "products": _split_elements(products)}
-    
+    return {
+        "reactants": [_split_elements(reactant) for reactant in reactants],
+        "products": [_split_elements(product) for product in products],
+    }

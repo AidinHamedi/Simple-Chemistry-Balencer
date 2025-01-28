@@ -1,10 +1,7 @@
 # Libs >>>
 import re
 
-# Modules >>>
-from .element_symbols import ELEMENT_SYMBOLS
-
-# Conf >>>
+# Consts >>>
 CHEMICAL_REGEX = re.compile(
     r'^'
     r'((?:[A-Z][a-z]?\d*|\((?:[A-Z][a-z]?\d*)+\)\d+)+'

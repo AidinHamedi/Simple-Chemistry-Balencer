@@ -34,12 +34,12 @@ def _atomic_composition(chemical_composition: list) -> dict:
     for chemical in chemical_composition:
         # Get the multiplier for this chemical compound
         multiplier = chemical.get("multiplier", 1)
-        
+
         # Get the number of atoms of each element
         for element in chemical["decomposition"]:
             # Calculate total atoms considering the multiplier
             total_atoms = element["number"] * multiplier
-            
+
             # If the element is already in the atomic composition, add the number of atoms
             if element["element"] in atomic_composition:
                 atomic_composition[element["element"]] += total_atoms
@@ -69,10 +69,10 @@ def _calculate_max_attempts(reactants: list, products: list) -> int:
     for chem in reactants + products:
         for elem in chem["decomposition"]:
             all_elements.add(elem["element"])
-    
+
     # Count total compounds
     total_compounds = len(reactants) + len(products)
-    
+
     # Calculate max attempts
     return 10 + (2 * len(all_elements)) + total_compounds
 
@@ -110,17 +110,20 @@ def _balance_elements(reactants: list, products: list) -> dict:
         # Get current atom counts for reactants and products
         reactants_comp = _atomic_composition(reactants)
         products_comp = _atomic_composition(products)
-        
+
         # Check if the equation is already balanced
         if reactants_comp == products_comp:
             break
-        
+
         # Create a processing order for elements, starting with those in the fewest compounds
         all_elements = set(reactants_comp.keys()).union(products_comp.keys())
         element_order = sorted(
             all_elements,
-            key=lambda e: sum(1 for chem in reactants + products 
-                            if any(el["element"] == e for el in chem["decomposition"]))
+            key=lambda e: sum(
+                1
+                for chem in reactants + products
+                if any(el["element"] == e for el in chem["decomposition"])
+            ),
         )
 
         # Balance each element in the determined order
@@ -128,18 +131,20 @@ def _balance_elements(reactants: list, products: list) -> dict:
             # Get current atom counts for this element
             r_count = reactants_comp.get(element, 0)
             p_count = products_comp.get(element, 0)
-            
+
             # Skip if the element is already balanced
             if r_count == p_count:
                 continue
-                
+
             # Raise an error if an element is missing from one side
             if r_count == 0 or p_count == 0:
-                raise ValueError(f"Element {element} is missing from one side of the equation.")
+                raise ValueError(
+                    f"Element {element} is missing from one side of the equation."
+                )
 
             # Calculate the least common multiple (LCM) of the atom counts
             balance_factor = lcm(r_count, p_count)
-            
+
             # Determine the required multipliers for reactants and products
             r_mult = balance_factor // r_count
             p_mult = balance_factor // p_count
@@ -148,7 +153,7 @@ def _balance_elements(reactants: list, products: list) -> dict:
             for chem in reactants:
                 if any(e["element"] == element for e in chem["decomposition"]):
                     chem["multiplier"] *= r_mult
-                    
+
             for chem in products:
                 if any(e["element"] == element for e in chem["decomposition"]):
                     chem["multiplier"] *= p_mult
@@ -167,12 +172,13 @@ def _balance_elements(reactants: list, products: list) -> dict:
     # Return the balanced equation
     return {"reactants": reactants, "products": products}
 
+
 # Main >>>
 def balance_formula(chemical_composition: dict) -> dict:
     """
     Balances a chemical equation by finding the appropriate coefficients for all reactants and products.
 
-    This function serves as the main entry point for chemical equation balancing. It extracts the reactants 
+    This function serves as the main entry point for chemical equation balancing. It extracts the reactants
     and products from the input dictionary and delegates the actual balancing to the _balance_elements helper function.
 
     Args:
@@ -205,4 +211,6 @@ def balance_formula(chemical_composition: dict) -> dict:
         ValueError: If an element is missing from one side of the equation or if balancing fails.
     """
     # Balance the elements + return the balanced elements
-    return _balance_elements(chemical_composition["reactants"], chemical_composition["products"])
+    return _balance_elements(
+        chemical_composition["reactants"], chemical_composition["products"]
+    )

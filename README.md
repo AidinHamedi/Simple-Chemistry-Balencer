@@ -99,5 +99,4 @@ H2+O2=>(H2O)2
 4. **Assembly**: Finally, the balanced components are assembled into a human-readable string format using `assembler.py`.
 
 ## 📝 License
-
-This project is licensed under the MIT License, allowing users to freely use, modify, and distribute it with proper attribution. 🌟
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.

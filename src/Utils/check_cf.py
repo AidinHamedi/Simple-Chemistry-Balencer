@@ -24,7 +24,7 @@ def check_formula(formula: str, raise_error: bool = True) -> bool:
     Returns:
         bool: True if the formula is valid, False otherwise."""
     # Check if the formula is valid
-    if not re.match(CHEMICAL_REGEX, formula.strip(" ")):
+    if not re.match(CHEMICAL_REGEX, formula):
         if raise_error:
             raise SystemExit("Invalid formula")
         return False

@@ -109,7 +109,7 @@ def _split_elements(chemical: str, raise_error: bool = True) -> list:
         # Check if the next char is a digit or not
         element_num = 1
         with suppress(IndexError):
-            if not chemical[idx + 1].isalpha():
+            if chemical[idx + 1].isdigit():
                 # Increase the index
                 idx += 1
                 # Get the char

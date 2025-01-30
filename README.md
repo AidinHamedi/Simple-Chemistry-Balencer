@@ -63,4 +63,4 @@ The `balance_formula` function calculates the necessary coefficients to balance 
 The `assemble_formula` function reconstructs the balanced equation into a readable string.
 
 ## 📝 License
-This project is licensed under the MIT License. See the [LICENSE](https://opensource.org/licenses/MIT) file for details.
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
